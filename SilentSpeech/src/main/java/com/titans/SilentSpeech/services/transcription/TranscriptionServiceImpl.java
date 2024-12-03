@@ -5,9 +5,12 @@ import com.assemblyai.api.resources.transcripts.types.Transcript;
 import com.assemblyai.api.resources.transcripts.types.TranscriptOptionalParams;
 import com.titans.SilentSpeech.dtos.request.ConvertAudioRequest;
 import com.titans.SilentSpeech.dtos.response.ConvertAudioResponse;
+import org.springframework.stereotype.Service;
 
 import java.util.concurrent.atomic.AtomicReference;
 
+
+@Service
 public class TranscriptionServiceImpl implements TranscriptionService{
 
     @Override
