@@ -2,6 +2,7 @@ package com.titans.SilentSpeech.services.AudioService;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
+import com.titans.SilentSpeech.dtos.response.AudioUploadResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -16,9 +17,16 @@ public class AudioService {
         this.cloudinary = cloudinary;
     }
 
-    public String uploadAudio(MultipartFile file) throws IOException {
+    public AudioUploadResponse uploadAudio(MultipartFile file) throws IOException {
         Map uploadResult = cloudinary.uploader().upload(file.getBytes(),
                 ObjectUtils.asMap("resource_type", "auto"));  // Automatically detects resource type, including audio
-        return uploadResult.get("url").toString();  // Return the URL of the uploaded audio file
+        AudioUploadResponse response = new AudioUploadResponse();
+        response.setPublic_id(uploadResult.get("public_id").toString());
+        response.setFormat(uploadResult.get("format").toString());
+        response.setUrl(uploadResult.get("url").toString());
+        response.setSecure_url(uploadResult.get("secure_url").toString());
+
+
+        return response;
     }
 }
