@@ -7,6 +7,7 @@ import com.titans.SilentSpeech.dtos.request.ConvertAudioRequest;
 import com.titans.SilentSpeech.dtos.response.ConvertAudioResponse;
 import com.titans.SilentSpeech.entities.Transcription;
 import com.titans.SilentSpeech.repositories.TranscriptionRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -15,6 +16,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 @Service
 public class TranscriptionServiceImpl implements TranscriptionService{
+    @Value("${assemblyai.api_key}")
+    private String apiKey;
 
     private final TranscriptionRepository transcriptionRepository;
 
@@ -26,7 +29,7 @@ public class TranscriptionServiceImpl implements TranscriptionService{
     public ConvertAudioResponse convertAudioToText(ConvertAudioRequest request) {
         AtomicReference<String> transcriptedText = new AtomicReference<>("");
             AssemblyAI assemblyAI = AssemblyAI.builder()
-                    .apiKey("")
+                    .apiKey(apiKey)
                     .build();
             String url = request.getAudioUrl();
             var config = TranscriptOptionalParams.builder()
