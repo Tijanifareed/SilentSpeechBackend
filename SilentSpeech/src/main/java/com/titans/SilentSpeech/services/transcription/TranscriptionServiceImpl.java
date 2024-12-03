@@ -13,9 +13,8 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.concurrent.atomic.AtomicReference;
 
-
 @Service
-public class TranscriptionServiceImpl implements TranscriptionService{
+public class TranscriptionServiceImpl implements TranscriptionService {
     @Value("${assemblyai.api_key}")
     private String apiKey;
 
@@ -28,20 +27,21 @@ public class TranscriptionServiceImpl implements TranscriptionService{
     @Override
     public ConvertAudioResponse convertAudioToText(ConvertAudioRequest request) {
         AtomicReference<String> transcriptedText = new AtomicReference<>("");
-            AssemblyAI assemblyAI = AssemblyAI.builder()
-                    .apiKey(apiKey)
-                    .build();
-            String url = request.getAudioUrl();
-            var config = TranscriptOptionalParams.builder()
-                    .speakerLabels(true)
-                    .build();
+        AssemblyAI assemblyAI = AssemblyAI.builder()
+                .apiKey(apiKey)
+                .build();
+        String url = request.getAudioUrl();
+        var config = TranscriptOptionalParams.builder()
+                .speakerLabels(true)
+                .build();
 
         try {
             Transcript transcript = assemblyAI.transcripts().transcribe(url, config);
             transcript.getUtterances().ifPresent(utterances -> {
                 utterances.forEach(utterance -> {
-                    transcriptedText.updateAndGet(text ->
-                            text + "Speaker " + utterance.getSpeaker() + ": " + utterance.getText() + "\n");
+                    // Use formatTextToConversation to improve message structure
+                    String formattedText = formatTextToConversation(utterance.getText());
+                    transcriptedText.updateAndGet(text -> text + formattedText + "\n");
                 });
             });
 
@@ -56,10 +56,23 @@ public class TranscriptionServiceImpl implements TranscriptionService{
             response.setTranscriptText(transcriptedText.get());
             response.setTranscriptionId(transcription1.getId());
             return response;
-        }catch(Exception e){
-            throw new RuntimeException("Error transcribing voice");
+        } catch (Exception e) {
+            throw new RuntimeException("Error transcribing voice", e);
         }
+    }
 
 
+    private String formatTextToConversation(String text) {
+        String[] sentences = text.split("\\.\\s*|\\?\\s*|!\\s*");
+        StringBuilder formatted = new StringBuilder();
+
+        for (int i = 0; i < sentences.length; i++) {
+            if (!sentences[i].trim().isEmpty()) {
+                formatted.append("Message ").append(i + 1).append(": ")
+                        .append(sentences[i].trim())
+                        .append(".\n");
+            }
+        }
+        return formatted.toString();
     }
 }
