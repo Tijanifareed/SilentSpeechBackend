@@ -7,7 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class StartAudioSessionResponse {
-    public int sessionId;
+    public Long sessionId;
     public String audioUrl;
     public int transcriptionId;
     public String transcriptionText;
