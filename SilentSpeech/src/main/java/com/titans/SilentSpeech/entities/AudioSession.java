@@ -14,7 +14,6 @@ public class AudioSession {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private Long userId;
     private String status;
     private LocalDateTime startedAt;

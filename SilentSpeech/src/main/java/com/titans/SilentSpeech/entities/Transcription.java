@@ -14,7 +14,6 @@ import java.time.LocalDateTime;
 @Setter
 @Entity
 public class Transcription {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long Id;
