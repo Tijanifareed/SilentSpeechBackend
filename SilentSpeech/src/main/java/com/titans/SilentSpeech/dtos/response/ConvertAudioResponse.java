@@ -12,6 +12,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class ConvertAudioResponse {
     private String transcriptText;
+    private Long transcriptionId;
     private String status;
 
 }

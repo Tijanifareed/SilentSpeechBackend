@@ -5,13 +5,22 @@ import com.assemblyai.api.resources.transcripts.types.Transcript;
 import com.assemblyai.api.resources.transcripts.types.TranscriptOptionalParams;
 import com.titans.SilentSpeech.dtos.request.ConvertAudioRequest;
 import com.titans.SilentSpeech.dtos.response.ConvertAudioResponse;
+import com.titans.SilentSpeech.entities.Transcription;
+import com.titans.SilentSpeech.repositories.TranscriptionRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.concurrent.atomic.AtomicReference;
 
 
 @Service
 public class TranscriptionServiceImpl implements TranscriptionService{
+
+    private final TranscriptionRepository transcriptionRepository;
+
+    public TranscriptionServiceImpl(TranscriptionRepository transcriptionRepository) {
+        this.transcriptionRepository = transcriptionRepository;
+    }
 
     @Override
     public ConvertAudioResponse convertAudioToText(ConvertAudioRequest request) {
@@ -33,10 +42,19 @@ public class TranscriptionServiceImpl implements TranscriptionService{
                 });
             });
 
-            return new ConvertAudioResponse(transcriptedText.get(), "success");
+            Transcription transcription = new Transcription();
+            transcription.setText(transcriptedText.get());
+            transcription.setStatus("Created");
+            transcription.setCreatedAt(LocalDateTime.now());
+            transcription.setSessionId(request.getSessionId());
+            Transcription transcription1 = transcriptionRepository.save(transcription);
+            ConvertAudioResponse response = new ConvertAudioResponse();
+            response.setStatus("success");
+            response.setTranscriptText(transcriptedText.get());
+            response.setTranscriptionId(transcription1.getId());
+            return response;
         }catch(Exception e){
-            return new ConvertAudioResponse("Error", "failed: " + e.getMessage());
-
+            throw new RuntimeException("Error transcribing voice");
         }
 
 
