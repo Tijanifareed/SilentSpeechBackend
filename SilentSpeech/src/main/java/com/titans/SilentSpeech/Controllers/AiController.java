@@ -18,8 +18,9 @@ import java.io.IOException;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CREATED;
 
+
 @RestController
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "http://localhost:3000")
 public class AiController {
     @Autowired
     private  ChatService chatService;
@@ -33,6 +34,7 @@ public class AiController {
         try{
             System.out.println(request.toString());
             ChatGptResponse response = chatService.summarizeMessage(request);
+            System.out.println(response.toString());
             return new ResponseEntity<>(new ApiResponse(true, response), CREATED);
         }catch (IOException | InterruptedException e){
             return ResponseEntity.status(500).body(new AudioResponse("Audio upload failed"));

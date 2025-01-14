@@ -30,7 +30,7 @@ public class AudioSessionServiceImpl implements AudioSessionService {
     @Override
     public StartAudioSessionResponse startAudioSession(StartAudioSessionRequest request) throws IOException {
         // Step 1: Upload audio and get audio URL
-        AudioUploadResponse audioUrl = audioService.uploadAudio(request.getAudio());
+        AudioUploadResponse audioUrl = audioService.uploadAudio(request.getAudioFile());
 
         // Step 2: Create and save audio session
         AudioSession audioSession = new AudioSession();

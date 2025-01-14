@@ -12,7 +12,4 @@ import lombok.Setter;
 @NoArgsConstructor
 public class AudioResponse {
     private String audioUrl;
-
-
-
 }

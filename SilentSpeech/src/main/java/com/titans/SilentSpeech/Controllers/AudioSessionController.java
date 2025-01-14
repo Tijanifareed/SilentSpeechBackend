@@ -3,39 +3,63 @@ package com.titans.SilentSpeech.Controllers;
 
 import com.titans.SilentSpeech.dtos.request.StartAudioSessionRequest;
 import com.titans.SilentSpeech.dtos.response.ApiResponse;
-import com.titans.SilentSpeech.dtos.response.AudioResponse;
-import com.titans.SilentSpeech.dtos.response.AudioUploadResponse;
 import com.titans.SilentSpeech.dtos.response.StartAudioSessionResponse;
 import com.titans.SilentSpeech.services.AudiosessionService.AudioSessionService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.CREATED;
-
 @RestController
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "http://localhost:3000")
 public class AudioSessionController {
     @Autowired
     private AudioSessionService audioSessionService;
+//
+
 
     @PostMapping("/transcribe-audio")
-    public ResponseEntity<?> startAudioSession(@ModelAttribute StartAudioSessionRequest request){
-        try{
-            StartAudioSessionResponse response = audioSessionService.startAudioSession(request);
-            return new ResponseEntity<>(new ApiResponse(true, response),CREATED);
-        } catch (IOException e) {
-            return ResponseEntity.status(500).body(new AudioResponse("Audio upload failed"));
-        }catch (RuntimeException e){
-            return new ResponseEntity<>(new ApiResponse(false, e.getMessage()), BAD_REQUEST);
-        }
+    public ResponseEntity<?> startAudioSession(@RequestParam("audio") MultipartFile audioFile,
+                                               @RequestParam("userId") Long userId) {
+        try {
+            // Log the file information for debugging
+            System.out.println("Received audio file for transcription: " + audioFile.getOriginalFilename());
+            System.out.println("Audio file size: " + audioFile.getSize()); // Log the file size
 
+            if (audioFile.isEmpty()) {
+                throw new RuntimeException("Uploaded file is empty.");
+            }
+
+            // Create the request object for service
+            StartAudioSessionRequest request = new StartAudioSessionRequest();
+            request.setUserId(userId);
+            request.setAudioFile(audioFile);
+
+            // Process the audio session
+            StartAudioSessionResponse response = audioSessionService.startAudioSession(request);
+
+            System.out.println(response);
+            // Return success response
+            System.out.println(ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse(true, response).toString()));
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse(true, response));
+
+        } catch (IOException e) {
+            // Handle upload failure
+            System.err.println("Audio upload failed: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse(false, "Audio upload failed. Please try again."));
+        } catch (RuntimeException e) {
+            // Handle runtime errors
+            System.err.println("Error during audio processing: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ApiResponse(false, e.getMessage()));
+        }
     }
+
+
 
 }
